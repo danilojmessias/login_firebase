@@ -18,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   late String titulo;
   late String actionButton;
   late String toggleButton;
+  bool loading = false;
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
       if (isLogin) {
         titulo = "Bem vindo";
         actionButton = 'Login';
-        toggleButton = 'Ainda nao tem conta';
+        toggleButton = 'Não tem uma conta? Cadastra-se';
       } else {
         titulo = "Crie Sua Conta";
         actionButton = 'Cadastrar';
@@ -42,9 +43,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   login() async {
+    setState(() => loading = true);
     try {
       await context.read<AuthService>().login(email.text, senha.text);
     } on AuthException catch (e) {
+      setState(() => loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message),
@@ -54,9 +57,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   registrar() async {
+    setState(() => loading = true);
     try {
       await context.read<AuthService>().registrar(email.text, senha.text);
     } on AuthException catch (e) {
+      setState(() => loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.message),
@@ -134,16 +139,27 @@ class _LoginPageState extends State<LoginPage> {
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.check),
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(
-                            actionButton,
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ],
+                      children: (loading)
+                          ? [
+                              const Padding(
+                                padding: EdgeInsets.all(16),
+                                child: SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            ]
+                          : [
+                              const Icon(Icons.check),
+                              Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Text(
+                                  actionButton,
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            ],
                     ),
                   ),
                 ),
